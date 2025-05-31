@@ -2,6 +2,22 @@
 
 This repository contains drivers for the taurob tracker robot system.
 
+## Porting WIP
+
+Currently we are porting this repo to ros2 humble. Below notes of progress.
+
+- [x] libtaurob/
+- [ ] taurob\_arm\_node/
+- [ ] taurob\_base\_node/
+- [ ] taurob\_commander\_switch/
+- [ ] taurob\_flipper\_node/
+- [ ] taurob\_relay\_dropper/
+- [ ] taurob\_teleop\_twist\_joy/
+- [x] taurob\_tracker\_description/
+- [ ] taurob\_watchdog/
+- [ ] taurob\_watchdog\_client/
+
+
 ## Prerequisites
 
 * The clocks of the control units inside the robot need to be synchronized via NTP with the computer that is running the ROS stack. Different Linux distributions provide different NTP server packages, below is a working example configuration for the [chrony](https://chrony.tuxfamily.org/) server:

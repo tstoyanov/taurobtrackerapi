@@ -1,16 +1,21 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>libtaurob</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>Low-level functions to talk to the taurob U-ECU.</description>
 
   <maintainer email="office@taurob.com">taurob GmbH</maintainer>
 
   <license>3-clause BSD</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <build_depend>rclcpp</build_depend>
   <build_depend>diagnostic_updater</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
 
-  <run_depend></run_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
 </package>

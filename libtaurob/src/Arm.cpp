@@ -239,15 +239,15 @@ void Arm::produce_temperature_diagnostics(int segment_number, diagnostic_updater
 
     if (status.temperature > 95)
     {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, ss.str());
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, ss.str());
     }
     else if (status.temperature > 85)
     {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, ss.str());
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, ss.str());
     }
     else
     {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, ss.str());
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, ss.str());
     }
 }
 
@@ -261,11 +261,11 @@ void Arm::produce_clutch_diagnostics(int segment_number, diagnostic_updater::Dia
     ARM_SEGMENT_STATUS status = this->Get(segment_number);
     if (status.status_bitfield & SEGMENT_STATUS_FRICTION_CLUTCH_SLIPPED)
     {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Slipped");
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "Slipped");
     }
     else
     {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "OK");
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "OK");
     }
 }
 

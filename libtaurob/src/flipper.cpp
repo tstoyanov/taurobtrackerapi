@@ -210,8 +210,8 @@ void Flipper::produce_connection_diagnostics(diagnostic_updater::DiagnosticStatu
 {
     if (ecu_socket->connection_timeout())
     {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "disconnected");
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "disconnected");
     } else {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "OK");
+        stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "OK");
     }
 }

@@ -1,25 +1,31 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.10)
 project(libtaurob)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+  
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  diagnostic_updater
-)
+set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-)
-
+find_package(ament_cmake REQUIRED)
+find_package(diagnostic_updater REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
+# Convenience variable for dependencies
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+    diagnostic_updater
+    diagnostic_msgs
+    rclcpp
+)
+ament_export_dependencies(
+    ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
-add_library(libtaurob
+add_library(libtaurob SHARED
   src/Arm.cpp
   src/Arm_frames.cpp
   src/Arm_segment.cpp
@@ -32,9 +38,34 @@ add_library(libtaurob
   src/SocketUDPBinary.cpp
 )
 
+ament_target_dependencies(${PROJECT_NAME}
+        ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  PRIVATE
+    include
+)
+
 target_link_libraries(libtaurob
   boost_thread
   boost_system
   boost_date_time
-  ${catkin_LIBRARIES}
 )
+
+#ament_target_dependencies (libtaurob diagnostic_updater)
+
+install(TARGETS libtaurob
+  EXPORT export_libtaurob
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+ament_export_targets(export_libtaurob HAS_LIBRARY_TARGET)
+
+ament_package()
+

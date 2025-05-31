@@ -37,7 +37,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#include <diagnostic_updater/publisher.h>
+#include <diagnostic_updater/publisher.hpp>
 
 #include "Arm_frames.h"
 #include "libtaurob_tools/SocketUDPBinary.h"

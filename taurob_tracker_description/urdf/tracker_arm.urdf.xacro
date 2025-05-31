@@ -10,10 +10,6 @@
       <xacro:insert_block name="origin"/>
       <axis xyz="0 0 1"/>
       <limit lower="${-180 * M_PI / 180}" upper="${180 * M_PI / 180}" effort="1000" velocity="${1.0 * 110 * M_PI / 180}"/>
-      <!--        <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-				 soft_upper_limit="${168 * M_PI / 180}"
-				 k_position="${100}"
-				 k_velocity="${2}"/>-->
       <parent link="${parent}"/>
       <child link="arm_link_0"/>
     </joint>
@@ -38,10 +34,6 @@
       <origin xyz="-0.052 0.0 0.1" rpy="0 0 0"/>
       <axis xyz="1 0 0"/>
       <limit lower="${0 * M_PI / 180}" upper="${180 * M_PI / 180}" effort="1000" velocity="${1.0 * 110 * M_PI / 180}"/>
-      <!--        <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-				 soft_upper_limit="${168 * M_PI / 180}"
-				 k_position="${100}"
-				 k_velocity="${2}"/>-->
       <parent link="arm_link_0"/>
       <child link="arm_link_1"/>
     </joint>
@@ -66,10 +58,6 @@
       <origin xyz="0.003 0.55 0.03" rpy=" 0 0 0"/>
       <axis xyz="-1 0 0"/>
       <limit lower="${0}" upper="${2 * M_PI}" effort="1000" velocity="${1.0 * 110 * M_PI / 180}"/>
-      <!--        <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-				 soft_upper_limit="${168 * M_PI / 180}"
-				 k_position="${100}"
-				 k_velocity="${2}"/>-->
       <parent link="arm_link_1"/>
       <child link="arm_link_2"/>
     </joint>
@@ -94,10 +82,6 @@
       <origin xyz="0.096 -0.42 0" rpy=" 0 0 0"/>
       <axis xyz="-1 0 0"/>
       <limit lower="${-180 * M_PI / 180}" upper="${180 * M_PI / 180}" effort="1000" velocity="${1.0 * 110 * M_PI / 180}"/>
-      <!--        <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-			 soft_upper_limit="${168 * M_PI / 180}"
-			 k_position="${100}"
-			 k_velocity="${2}"/>-->
       <parent link="arm_link_2"/>
       <child link="arm_link_3"/>
     </joint>
@@ -118,58 +102,5 @@
       </visual>
       <arm_link_3_collision_geom_marco/>
     </link>
-    <!--Needed for simulation-->
-    <transmission name="arm_joint_0_joint_transmssion">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="arm_joint_0">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-      </joint>
-      <actuator name="arm_joint_0_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
-    <transmission name="arm_joint_1_joint_transmssion">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="arm_joint_1">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-      </joint>
-      <actuator name="arm_joint_1_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
-    <transmission name="arm_joint_2_joint_transmssion">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="arm_joint_2">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-      </joint>
-      <actuator name="arm_joint_2_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
-    <transmission name="arm_joint_3_joint_transmssion">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="arm_joint_3">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-      </joint>
-      <actuator name="arm_joint_3_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
-    <gazebo reference="arm_link_0">
-      <material>Gazebo/Grey</material>
-    </gazebo>
-    <gazebo reference="arm_link_1">
-      <material>Gazebo/Grey</material>
-    </gazebo>
-    <gazebo reference="arm_link_2">
-      <material>Gazebo/Grey</material>
-    </gazebo>
-    <gazebo reference="arm_link_3">
-      <material>Gazebo/Grey</material>
-    </gazebo>
   </xacro:macro>
 </robot>

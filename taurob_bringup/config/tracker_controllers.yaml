@@ -1,0 +1,50 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    flipper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+diff_drive_controller:
+  ros__parameters:
+    left_wheel_names: ["track_left"]
+    right_wheel_names: ["track_right"]
+    wheel_separation: 0.55
+    wheel_radius: 0.1515
+    publish_rate: 50.0
+    odom_frame_id: odom
+    base_frame_id: base_link
+    enable_odom_tf: true
+    use_stamped_vel: false
+
+arm_controller:
+  ros__parameters:
+    joints:
+      - arm_joint_0
+      - arm_joint_1
+      - arm_joint_2
+      - arm_joint_3
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+    allow_partial_joints_goal: true
+
+flipper_controller:
+  ros__parameters:
+    joints:
+      - flipper_front
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+    allow_partial_joints_goal: true

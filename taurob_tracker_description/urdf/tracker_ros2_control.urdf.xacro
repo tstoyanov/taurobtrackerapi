@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="taurob_tracker">
+
+  <xacro:macro name="tracker_ros2_control" params="base_ip:='10.0.0.2' base_port:='8080'
+                                                   gear_ratio:='76.0' wheel_diameter:='0.303'
+                                                   track_width:='0.55' watchdog_enabled:='true'">
+
+    <!-- Base drivetrain: diff drive on the two tracks -->
+    <ros2_control name="tracker_base" type="system">
+      <hardware>
+        <plugin>taurob_tracker_hardware/TrackerBaseSystem</plugin>
+        <param name="base_ip">${base_ip}</param>
+        <param name="base_port">${base_port}</param>
+        <param name="protocol_version">2</param>
+        <param name="gear_ratio">${gear_ratio}</param>
+        <param name="wheel_diameter">${wheel_diameter}</param>
+        <param name="track_width">${track_width}</param>
+        <param name="turning_geometry_factor">1.0</param>
+        <param name="watchdog_enabled">${watchdog_enabled}</param>
+      </hardware>
+      <joint name="track_left">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="track_right">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+
+    <!-- Flipper -->
+    <ros2_control name="tracker_flipper" type="system">
+      <hardware>
+        <plugin>taurob_tracker_hardware/TrackerFlipperHardware</plugin>
+        <param name="flipper_ip">10.0.0.2</param>
+        <param name="flipper_port">10002</param>
+        <param name="watchdog_enabled">${watchdog_enabled}</param>
+      </hardware>
+      <joint name="flipper_front">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+      </joint>
+    </ros2_control>
+
+    <!-- Arm: per-joint ECU addresses follow the ROS 1 tracker.yaml calibration
+         format name:ip:port:offset -->
+    <ros2_control name="tracker_arm" type="system">
+      <hardware>
+        <plugin>taurob_tracker_hardware/TrackerArmHardware</plugin>
+        <param name="watchdog_enabled">${watchdog_enabled}</param>
+      </hardware>
+      <joint name="arm_joint_0">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <param name="ip">10.0.0.121</param>
+        <param name="port">9081</param>
+        <param name="position_tolerance_mrad">100</param>
+        <param name="offset">0</param>
+      </joint>
+      <joint name="arm_joint_1">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <param name="ip">10.0.0.121</param>
+        <param name="port">9082</param>
+        <param name="position_tolerance_mrad">100</param>
+        <param name="offset">0</param>
+      </joint>
+      <joint name="arm_joint_2">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <param name="ip">10.0.0.121</param>
+        <param name="port">9083</param>
+        <param name="position_tolerance_mrad">100</param>
+        <param name="offset">0</param>
+      </joint>
+      <joint name="arm_joint_3">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <param name="ip">10.0.0.121</param>
+        <param name="port">9084</param>
+        <param name="position_tolerance_mrad">100</param>
+        <param name="offset">0</param>
+      </joint>
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>

@@ -24,20 +24,20 @@ jobs:
           apt-get update -qq
           apt-get install -y ros-jazzy-ros2-control ros-jazzy-ros2-controllers
           rosdep update
-          rosdep install --from-paths libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware --ignore-src -y --rosdistro jazzy
+          rosdep install --from-paths libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware taurob_bringup --ignore-src -y --rosdistro jazzy
 
       # Build only the packages already ported to ROS 2/ament; the remaining
       # watchdog packages are still catkin and are ported in Phase 2.
       - name: Build
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware --event-handlers console_direct+
+          colcon build --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware taurob_bringup --event-handlers console_direct+
 
       - name: Test
         run: |
           source /opt/ros/jazzy/setup.bash
           source install/setup.bash
-          colcon test --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware --event-handlers console_direct+
+          colcon test --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware taurob_bringup --event-handlers console_direct+
           colcon test-result --verbose
 
   urdf_check:
@@ -67,6 +67,9 @@ jobs:
           export AMENT_PREFIX_PATH=$PWD/install/hector:$AMENT_PREFIX_PATH
           xacro taurob_tracker_description/urdf/tracker.urdf.xacro > /tmp/tracker.urdf
           grep -q "<robot" /tmp/tracker.urdf
+          grep -q "taurob_tracker_hardware/TrackerBaseSystem" /tmp/tracker.urdf
+          grep -q "taurob_tracker_hardware/TrackerArmHardware" /tmp/tracker.urdf
+          grep -q "taurob_tracker_hardware/TrackerFlipperHardware" /tmp/tracker.urdf
           xacro taurob_tracker_description/urdf/tracker_arm.urdf.xacro > /tmp/tracker_arm.urdf
           grep -q "<robot" /tmp/tracker_arm.urdf
 

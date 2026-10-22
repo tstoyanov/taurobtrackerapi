@@ -15,4 +15,7 @@
   <xacro:tracker_arm_macro parent="base_link">
     <origin xyz="0.12 0 0.185" rpy="0 0 ${M_PI/2}"/>
   </xacro:tracker_arm_macro>
+
+  <xacro:include filename="$(find taurob_tracker_description)/urdf/tracker_ros2_control.urdf.xacro"/>
+  <xacro:tracker_ros2_control/>
 </robot>

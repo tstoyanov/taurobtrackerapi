@@ -209,7 +209,7 @@ protected:
   }
 };
 
-std::string arm_hardware_info_xml(int port, const std::string & watchdog)
+std::string arm_hardware_info_xml(int port0, int port1, const std::string & watchdog)
 {
   return
     "<?xml version=\"1.0\"?>"
@@ -228,7 +228,7 @@ std::string arm_hardware_info_xml(int port, const std::string & watchdog)
     "      <command_interface name=\"position\"/>"
     "      <state_interface name=\"position\"/>"
     "      <param name=\"ip\">127.0.0.1</param>"
-    "      <param name=\"port\">" + std::to_string(port) + "</param>"
+    "      <param name=\"port\">" + std::to_string(port0) + "</param>"
     "      <param name=\"position_tolerance_mrad\">100</param>"
     "      <param name=\"offset\">0</param>"
     "    </joint>"
@@ -236,7 +236,7 @@ std::string arm_hardware_info_xml(int port, const std::string & watchdog)
     "      <command_interface name=\"position\"/>"
     "      <state_interface name=\"position\"/>"
     "      <param name=\"ip\">127.0.0.1</param>"
-    "      <param name=\"port\">" + std::to_string(port) + "</param>"
+    "      <param name=\"port\">" + std::to_string(port1) + "</param>"
     "      <param name=\"position_tolerance_mrad\">100</param>"
     "      <param name=\"offset\">0</param>"
     "    </joint>"
@@ -270,11 +270,13 @@ std::string flipper_hardware_info_xml(int port, const std::string & watchdog)
 /// The arm interface forwards position commands to the (mock) ECU.
 TEST_F(TestFixture, ArmHardwareCommandsMockEcu)
 {
-  const uint16_t port = find_free_udp_port();
-  MockArmEcu ecu(port);
+  const uint16_t port0 = find_free_udp_port();
+  const uint16_t port1 = find_free_udp_port();
+  MockArmEcu ecu0(port0);
+  MockArmEcu ecu1(port1);
 
   const auto info = hardware_interface::parse_control_resources_from_urdf(
-    arm_hardware_info_xml(port, "false"));
+    arm_hardware_info_xml(port0, port1, "false"));
 
   auto arm = std::make_shared<taurob_tracker_hardware::TrackerArmHardware>();
   ASSERT_EQ(arm->on_init(info[0]), hardware_interface::CallbackReturn::SUCCESS);
@@ -290,7 +292,7 @@ TEST_F(TestFixture, ArmHardwareCommandsMockEcu)
 
   const rclcpp::Time now(0, 0, RCL_ROS_TIME);
   const rclcpp::Duration dt = rclcpp::Duration::from_seconds(0.05);
-  for (int i = 0; i < 30 && (ecu.commanded_position_mrad() == 0); ++i)
+  for (int i = 0; i < 30 && (ecu0.commanded_position_mrad() == 0); ++i)
   {
     ASSERT_EQ(arm->read(now, dt), hardware_interface::return_type::OK);
     ASSERT_EQ(arm->write(now, dt), hardware_interface::return_type::OK);
@@ -298,8 +300,8 @@ TEST_F(TestFixture, ArmHardwareCommandsMockEcu)
   }
 
   // 0.5 rad = 500 mrad on the wire
-  EXPECT_EQ(ecu.commanded_position_mrad(), 500);
-  EXPECT_EQ(ecu.commanded_state(), 1);  // POSITION_CONTROL
+  EXPECT_EQ(ecu0.commanded_position_mrad(), 500);
+  EXPECT_EQ(ecu0.commanded_state(), 1);  // POSITION_CONTROL
 
   auto states = arm->export_state_interfaces();
   ASSERT_EQ(states.size(), 2u);
@@ -317,11 +319,13 @@ TEST_F(TestFixture, ArmHardwareCommandsMockEcu)
 /// With the watchdog enabled but not fed, the arm must command STOP.
 TEST_F(TestFixture, ArmHardwareStopsWhenWatchdogNotFed)
 {
-  const uint16_t port = find_free_udp_port();
-  MockArmEcu ecu(port);
+  const uint16_t port0 = find_free_udp_port();
+  const uint16_t port1 = find_free_udp_port();
+  MockArmEcu ecu0(port0);
+  MockArmEcu ecu1(port1);
 
   const auto info = hardware_interface::parse_control_resources_from_urdf(
-    arm_hardware_info_xml(port, "true"));
+    arm_hardware_info_xml(port0, port1, "true"));
 
   auto arm = std::make_shared<taurob_tracker_hardware::TrackerArmHardware>();
   ASSERT_EQ(arm->on_init(info[0]), hardware_interface::CallbackReturn::SUCCESS);
@@ -342,7 +346,7 @@ TEST_F(TestFixture, ArmHardwareStopsWhenWatchdogNotFed)
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
-  EXPECT_EQ(ecu.commanded_state(), 0);  // STOP
+  EXPECT_EQ(ecu0.commanded_state(), 0);  // STOP
 
   ASSERT_EQ(arm->on_deactivate(state), hardware_interface::CallbackReturn::SUCCESS);
 }

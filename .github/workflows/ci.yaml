@@ -131,3 +131,46 @@ jobs:
           kill $NODE_PID
           pkill -f taurob_watchdog_node || true
           echo "PASS: watchdog ceased to feed after client stopped"
+
+  bringup_check:
+    runs-on: ubuntu-latest
+    container:
+      image: ros:jazzy
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          . /opt/ros/jazzy/setup.bash
+          apt-get update -qq
+          apt-get install -y ros-jazzy-ros2-control ros-jazzy-ros2-controllers ros-jazzy-joint-state-broadcaster ros-jazzy-diff-drive-controller ros-jazzy-joint-trajectory-controller ros-jazzy-xacro git
+          rosdep update
+          rosdep install --from-paths libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware taurob_bringup --ignore-src -y --rosdistro jazzy
+
+      - name: Build
+        run: |
+          . /opt/ros/jazzy/setup.bash
+          colcon build --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client taurob_tracker_hardware taurob_bringup --event-handlers console_direct+
+
+      - name: Hardware plugins load from the URDF
+        run: |
+          . install/setup.bash
+          xacro $(ros2 pkg prefix taurob_tracker_description)/share/taurob_tracker_description/urdf/tracker.urdf.xacro watchdog_enabled:=false > /tmp/tracker.urdf
+          # the controller manager must load all four taurob hardware plugins;
+          # without an ECU they cannot be activated, so only configure (load) them
+          ros2 control_node --help > /dev/null 2>&1 || true
+          timeout 20 ros2 launch taurob_bringup tracker_bringup.launch.py watchdog_enabled:=false > /tmp/bringup.log 2>&1 || true
+          for plugin in TrackerBaseSystem TrackerArmHardware TrackerFlipperHardware TrackerClawHardware; do
+            grep -q "$plugin" /tmp/bringup.log || { echo "FAIL: $plugin did not load"; cat /tmp/bringup.log; exit 1; }
+            echo "$plugin loaded"
+          done
+          # controllers must be loaded and configured
+          for controller in joint_state_broadcaster diff_drive_controller arm_controller flipper_controller claw_controller; do
+            grep -q "$controller" /tmp/bringup.log || { echo "FAIL: $controller did not load"; cat /tmp/bringup.log; exit 1; }
+            echo "$controller loaded"
+          done
+

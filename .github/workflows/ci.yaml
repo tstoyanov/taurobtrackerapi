@@ -165,10 +165,6 @@ jobs:
           touch install/hector/share/ament_index/resource_index/packages/hector_xacro_tools
           cp -r /tmp/hector_models/hector_xacro_tools install/hector/share/
           export AMENT_PREFIX_PATH=$PWD/install/hector:$AMENT_PREFIX_PATH
-          ls -la install/*/lib/ 2>/dev/null | head -30
-          ls -la install/*/share/taurob_tracker_hardware/ 2>/dev/null
-          cat install/*/share/ament_index/resource_index/hardware_interface__pluginlib__plugin/* 2>/dev/null | head -10
-          find install -name "*tracker*" | head -20
           xacro $(ros2 pkg prefix taurob_tracker_description)/share/taurob_tracker_description/urdf/tracker.urdf.xacro watchdog_enabled:=false > /tmp/tracker.urdf
           # the controller manager in this distro consumes robot_description from
           # the topic; publish it in the background so hardware loads without a

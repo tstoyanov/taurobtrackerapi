@@ -22,7 +22,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   libtaurob
 )
 
-add_library(tracker_base_system
+add_library(tracker_base_system SHARED
   src/tracker_base_system.cpp
 )
 target_compile_definitions(tracker_base_system PRIVATE TRACKER_BASE_SYSTEM_BUILDING_LIBRARY)
@@ -33,7 +33,7 @@ target_include_directories(tracker_base_system PUBLIC
 )
 pluginlib_export_plugin_description_file(hardware_interface tracker_base_system.xml)
 
-add_library(tracker_arm_hardware
+add_library(tracker_arm_hardware SHARED
   src/tracker_arm_hardware.cpp
 )
 ament_target_dependencies(tracker_arm_hardware ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -43,7 +43,7 @@ target_include_directories(tracker_arm_hardware PUBLIC
 )
 pluginlib_export_plugin_description_file(hardware_interface tracker_arm_hardware.xml)
 
-add_library(tracker_flipper_hardware
+add_library(tracker_flipper_hardware SHARED
   src/tracker_flipper_hardware.cpp
 )
 ament_target_dependencies(tracker_flipper_hardware ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -53,7 +53,7 @@ target_include_directories(tracker_flipper_hardware PUBLIC
 )
 pluginlib_export_plugin_description_file(hardware_interface tracker_flipper_hardware.xml)
 
-add_library(tracker_claw_hardware
+add_library(tracker_claw_hardware SHARED
   src/tracker_claw_hardware.cpp
 )
 ament_target_dependencies(tracker_claw_hardware ${THIS_PACKAGE_INCLUDE_DEPENDS})

@@ -12,6 +12,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstring>
+#include <stdexcept>
 #include <string>
 #include <thread>
 
@@ -37,7 +38,7 @@ public:
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(listen_port);
-    bind(socket_, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+    if (::bind(socket_, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) < 0) { throw std::runtime_error("bind failed"); }
     running_ = true;
     thread_ = std::thread([this] { loop(); });
   }
@@ -148,7 +149,7 @@ protected:
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     addr.sin_port = 0;
-    bind(probe, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+    ::bind(probe, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
     sockaddr_in bound{};
     socklen_t len = sizeof(bound);
     getsockname(probe, reinterpret_cast<sockaddr *>(&bound), &len);

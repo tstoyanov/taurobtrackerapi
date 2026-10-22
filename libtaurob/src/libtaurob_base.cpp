@@ -139,10 +139,15 @@ void Taurob_base::On_string_received(std::string msg_data, char* from_remote_ip,
 void Taurob_base::Run()
 {
     Init_frames();
-    sending_thread = boost::thread(boost::bind(&Taurob_base::Sending_thread, this));
-    sending_thread_running = true;
 
     ecu_socket = new SocketUDP(ECU_host_ip, ECU_host_port); // To Send & Receive
+
+    // create the socket and set the run flag before starting the sending
+    // thread, otherwise the thread may dereference the socket pointer before
+    // it is assigned
+    sending_thread_running = true;
+    sending_thread = boost::thread(boost::bind(&Taurob_base::Sending_thread, this));
+
     ecu_socket->start_listen(this);
 }
 

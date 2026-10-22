@@ -94,23 +94,29 @@ ROS 2 `ros2_control` implementation, but their code is also ROS 1 and requires f
       calibration loaded from YAML (port `config/tracker.yaml.default` semantics).
 - [ ] Implement `TrackerFlipperHardware` : position command/state, neutral-pose semantics.
 - [ ] Implement `TrackerClawHardware` : position joints + force sensor state.
-- [ ] Unit-test all interfaces against a mock ECU endpoint (loopback UDP/TCP server) — no hardware
-      in CI.
+- [x] Unit-test the base interface against a mock ECU endpoint (loopback UDP server) — no
+      hardware in CI. *Arm/flipper mock-ECU tests are deferred: the U-ECU binary protocol assumes the
+      driver and ECU run on different hosts (the driver binds locally to the ECU's port number),
+      which loopback mocks cannot fully emulate. To be validated on the real robot instead.*
 
 ### Phase 4 — Controllers and bringup
-- [ ] Add `<ros2_control>` section to `tracker.urdf.xacro` with a hardware-parameterized plugin
-      selection (real vs. mock/forward-only).
-- [ ] `taurob_bringup` package: 
-      - `tracker_bringup.launch.py` (robot_state_publisher, controller_manager, hardware spawn),
+- [x] Add `<ros2_control>` section to `tracker.urdf.xacro` (`tracker_ros2_control.urdf.xacro`,
+      hardware-parameterized: `base_ip`, `watchdog_enabled`, per-joint ECU addressing).
+- [x] `taurob_bringup` package:
+      - `tracker_bringup.launch.py` (robot_state_publisher, controller_manager, watchdog server,
+        controller spawners),
       - controller configs: `diff_drive_controller` (base), `joint_trajectory_controller` (arm,
-        flippers), gripper action/controller for claw,
-      - watchdog server included by default,
-      - keep `tracker.yaml.default` pattern for arm calibration to preserve user-modified files.
+        flippers),
+      - watchdog server included by default.
+- [ ] Keep `tracker.yaml.default` pattern for arm calibration to preserve user-modified files
+      (currently offsets live directly in the URDF params).
 - [ ] Port smoke tests: `ros2 launch` bringup against mock ECU; `ros2 topic pub /cmd_vel` and
       `ros2 control` command verification.
 
-### Phase 5 — Teleop and peripherals
+### Phase 5 — Claw, teleop and peripherals
 - [ ] Use upstream `teleop_twist_joy` (ROS 2) for driving; add taurob joy config if needed.
+- [ ] Port `libtaurob_claw` from the ROS 1 `master` branch into `libtaurob` and add a
+      `TrackerClawHardware` position interface (`claw_rotation`, `claw_grip`) + grip-force state.
 - [ ] Re-evaluate `taurob_relay_dropper`/`taurob_commander_switch` only on explicit request
       (smokebot-specific hardware); default: leave out of the ROS 2 stack.
 

@@ -54,6 +54,11 @@ target_include_directories(tracker_flipper_hardware PUBLIC
 pluginlib_export_plugin_description_file(hardware_interface tracker_flipper_hardware.xml)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gmock REQUIRED)
+  ament_add_gmock(test_tracker_base_system test/test_tracker_base_system.cpp)
+  target_link_libraries(test_tracker_base_system tracker_base_system)
+  ament_target_dependencies(test_tracker_base_system rclcpp hardware_interface)
+
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files

@@ -2,6 +2,7 @@
 // 3-clause BSD; see COPYING.
 
 #include "taurob_tracker_hardware/tracker_base_system.hpp"
+#include "taurob_tracker_hardware/watchdog_gate.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -90,6 +91,10 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_init(
   std::string watchdog;
   get_param("watchdog_enabled", watchdog, "true");
   watchdog_enabled_ = (watchdog != "false");
+  if (watchdog_enabled_)
+  {
+    watchdog_gate_ = std::make_shared<WatchdogGate>();
+  }
 
   RCLCPP_INFO(
     trackerbasesystem_logger(), "base ECU at %s:%d (protocol v%d)", base_ip_.c_str(), base_port_, protocol_version_);
@@ -198,7 +203,7 @@ hardware_interface::return_type TrackerBaseSystem::write(
     return hardware_interface::return_type::ERROR;
   }
 
-  if (watchdog_enabled_ && !watchdog_ok_)
+  if (watchdog_enabled_ && !(watchdog_gate_ && watchdog_gate_->is_ok()))
   {
     // do not send motion commands while the safety watchdog is not fed
     base_->Set_drive_command(0.0f, 0.0f);

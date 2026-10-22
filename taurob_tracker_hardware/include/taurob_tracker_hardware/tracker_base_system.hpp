@@ -16,7 +16,8 @@
 #include "rclcpp_lifecycle/state.hpp"
 
 #include "libtaurob_base/libtaurob_base.h"
-#include "libtaurob_flipper/libtaurob_flipper.h"
+
+#include "taurob_tracker_hardware/watchdog_gate.hpp"
 
 namespace taurob_tracker_hardware
 {
@@ -88,7 +89,7 @@ private:
   double turning_geometry_factor_ = 1.0;
 
   bool watchdog_enabled_ = true;
-  bool watchdog_ok_ = false;
+  std::shared_ptr<WatchdogGate> watchdog_gate_;
 
   std::unique_ptr<Taurob_base> base_;
 };

@@ -61,6 +61,12 @@ if(BUILD_TESTING)
   target_compile_options(test_tracker_base_system PRIVATE -fsanitize=address -g)
   target_link_options(test_tracker_base_system PRIVATE -fsanitize=address)
 
+  ament_add_gmock(test_tracker_arm_flipper test/test_tracker_arm_flipper.cpp)
+  target_link_libraries(test_tracker_arm_flipper tracker_arm_hardware tracker_flipper_hardware)
+  ament_target_dependencies(test_tracker_arm_flipper rclcpp hardware_interface)
+  target_compile_options(test_tracker_arm_flipper PRIVATE -fsanitize=address -g)
+  target_link_options(test_tracker_arm_flipper PRIVATE -fsanitize=address)
+
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files

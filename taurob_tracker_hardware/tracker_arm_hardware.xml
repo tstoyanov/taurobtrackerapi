@@ -1,0 +1,7 @@
+<library path="tracker_arm_hardware">
+  <class name="taurob_tracker_hardware/TrackerArmHardware"
+         type="taurob_tracker_hardware::TrackerArmHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>Taurob tracker arm joints (position control, per-joint offset calibration) via libtaurob.</description>
+  </class>
+</library>

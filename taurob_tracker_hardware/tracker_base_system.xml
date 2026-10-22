@@ -1,0 +1,7 @@
+<library path="tracker_base_system">
+  <class name="taurob_tracker_hardware/TrackerBaseSystem"
+         type="taurob_tracker_hardware::TrackerBaseSystem"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>Taurob tracker base platform (diff drive tracks + sensors) via libtaurob.</description>
+  </class>
+</library>

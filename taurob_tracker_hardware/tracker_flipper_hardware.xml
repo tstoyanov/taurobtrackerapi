@@ -1,0 +1,7 @@
+<library path="tracker_flipper_hardware">
+  <class name="taurob_tracker_hardware/TrackerFlipperHardware"
+         type="taurob_tracker_hardware::TrackerFlipperHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>Taurob tracker flipper (single position-controlled joint) via libtaurob.</description>
+  </class>
+</library>

@@ -23,6 +23,28 @@
       <axis xyz="0 0 1"/>
     </joint>
 
+    <!-- Abstract joints for the flipper and claw (the kinematic chassis model
+         uses flipper_joint_0/1; these exist solely for ros2_control). -->
+    <link name="flipper_front_link"/>
+    <joint name="flipper_front" type="continuous">
+      <parent link="base_link"/>
+      <child link="flipper_front_link"/>
+      <origin xyz="${float(flipper_offset_x)} 0 ${float(flipper_offset_z)}"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+    <link name="claw_rotation_link"/>
+    <link name="claw_grip_link"/>
+    <joint name="claw_rotation" type="continuous">
+      <parent link="arm_link_3"/>
+      <child link="claw_rotation_link"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+    <joint name="claw_grip" type="continuous">
+      <parent link="claw_rotation_link"/>
+      <child link="claw_grip_link"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+
     <!-- Base drivetrain: diff drive on the two tracks -->
     <ros2_control name="tracker_base" type="system">
       <hardware>

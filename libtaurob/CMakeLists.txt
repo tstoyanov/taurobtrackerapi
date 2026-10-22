@@ -59,6 +59,10 @@ install(TARGETS libtaurob
   RUNTIME DESTINATION bin
 )
 
+install(DIRECTORY include/
+  DESTINATION include
+)
+
 ament_export_targets(export_libtaurob HAS_LIBRARY_TARGET)
 
 ament_package()

@@ -205,7 +205,8 @@ std::string SocketUDP::receive()
 		DEBUG("Error in received packet");
 		DEBUG("Error data: %s\n", receive_buf);
 		perror("recvfrom()");
-		return NULL;
+		free(receive_from);
+		return std::string();
 	}
 
 	if (detect_host &&
@@ -216,8 +217,7 @@ std::string SocketUDP::receive()
 		prepareToSend();
 	}
 
-	std::string result = std::string(receive_buf);
-	result.resize(receive_len);
+	std::string result(receive_buf, receive_len);
 
 	if (is_closing == false) 
 	{

@@ -5,6 +5,24 @@
                                                    gear_ratio:='76.0' wheel_diameter:='0.303'
                                                    track_width:='0.55' watchdog_enabled:='true'">
 
+    <!-- Abstract wheel joints representing the two tracks for diff_drive_controller.
+         The tracks themselves have no discrete wheel joints in the kinematic model,
+         so these exist solely for ros2_control. -->
+    <link name="track_left_link"/>
+    <link name="track_right_link"/>
+    <joint name="track_left" type="continuous">
+      <parent link="base_link"/>
+      <child link="track_left_link"/>
+      <origin xyz="0 ${track_width / 2} 0" rpy="0 ${M_PI / 2} 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+    <joint name="track_right" type="continuous">
+      <parent link="base_link"/>
+      <child link="track_right_link"/>
+      <origin xyz="0 -${track_width / 2} 0" rpy="0 ${M_PI / 2} 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+
     <!-- Base drivetrain: diff drive on the two tracks -->
     <ros2_control name="tracker_base" type="system">
       <hardware>

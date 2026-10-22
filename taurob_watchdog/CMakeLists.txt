@@ -22,7 +22,7 @@ ament_target_dependencies(taurob_watchdog_node
 )
 
 target_link_libraries(taurob_watchdog_node
-  libtaurob
+  libtaurob::libtaurob
   boost_system
 )
 

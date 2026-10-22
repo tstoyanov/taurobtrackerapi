@@ -58,6 +58,8 @@ if(BUILD_TESTING)
   ament_add_gmock(test_tracker_base_system test/test_tracker_base_system.cpp)
   target_link_libraries(test_tracker_base_system tracker_base_system)
   ament_target_dependencies(test_tracker_base_system rclcpp hardware_interface)
+  target_compile_options(test_tracker_base_system PRIVATE -fsanitize=address -g)
+  target_link_options(test_tracker_base_system PRIVATE -fsanitize=address)
 
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

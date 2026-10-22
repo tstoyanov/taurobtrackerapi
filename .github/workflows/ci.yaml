@@ -58,6 +58,8 @@ jobs:
           git clone --depth 1 https://github.com/tu-darmstadt-ros-pkg/hector_models.git /tmp/hector_models
           colcon build --packages-select taurob_tracker_description
           . install/setup.bash
+          colcon build --packages-select hector_xacro_tools --base-paths /tmp/hector_models/hector_xacro_tools
+          . install/setup.bash
           xacro taurob_tracker_description/urdf/tracker.urdf.xacro > /tmp/tracker.urdf
           grep -q "<robot" /tmp/tracker.urdf
           xacro taurob_tracker_description/urdf/tracker_arm.urdf.xacro > /tmp/tracker_arm.urdf

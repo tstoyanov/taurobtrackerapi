@@ -106,6 +106,9 @@ std::string base_hardware_info_xml(const std::string & ip, int port)
   return
     "<?xml version=\"1.0\"?>"
     "<robot name=\"tracker_test\">"
+    "<link name=\"base_link\"/>"
+    "<link name=\"wheel_left_link\"/>"
+    "<link name=\"wheel_right_link\"/>"
     "  <ros2_control name=\"TestBase\" type=\"system\">"
     "    <hardware>"
     "      <plugin>taurob_tracker_hardware/TrackerBaseSystem</plugin>"

@@ -166,10 +166,19 @@ jobs:
           cp -r /tmp/hector_models/hector_xacro_tools install/hector/share/
           export AMENT_PREFIX_PATH=$PWD/install/hector:$AMENT_PREFIX_PATH
           xacro $(ros2 pkg prefix taurob_tracker_description)/share/taurob_tracker_description/urdf/tracker.urdf.xacro watchdog_enabled:=false > /tmp/tracker.urdf
-          # the controller manager must load all four taurob hardware plugins;
-          # without an ECU they cannot be activated, so only configure (load) them
-          ros2 control_node --help > /dev/null 2>&1 || true
-          timeout 20 ros2 launch taurob_bringup tracker_bringup.launch.py watchdog_enabled:=false > /tmp/bringup.log 2>&1 || true
+          # the controller manager in this distro consumes robot_description from
+          # the topic; publish it in the background so hardware loads without a
+          # race against the robot state publisher
+          python3 - <<'PYEOF'
+          import subprocess, threading, time
+          with open('/tmp/robot_description_msg.yaml', 'w') as f:
+              import json
+              f.write('data: ' + json.dumps(open('/tmp/tracker.urdf').read()))
+          PYEOF
+          ros2 topic pub --qos-durability transient_local -r 1 /robot_description std_msgs/msg/String --file /tmp/robot_description_msg.yaml > /dev/null 2>&1 &
+          PUB_PID=$!
+          timeout 25 ros2 launch taurob_bringup tracker_bringup.launch.py watchdog_enabled:=false > /tmp/bringup.log 2>&1 || true
+          kill $PUB_PID || true
           for plugin in TrackerBaseSystem TrackerArmHardware TrackerFlipperHardware TrackerClawHardware; do
             grep -q "$plugin" /tmp/bringup.log || { echo "FAIL: $plugin did not load"; cat /tmp/bringup.log; exit 1; }
             echo "$plugin loaded"

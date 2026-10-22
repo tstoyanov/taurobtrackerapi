@@ -16,8 +16,8 @@ See [MIGRATION_PLAN.md](MIGRATION_PLAN.md) for the detailed migration plan and p
 |---|---|---|
 | `libtaurob` | low-level U-ECU communication library (arm, base, flipper, sockets) | ✅ ported to ament_cmake |
 | `taurob_tracker_description` | URDF/xacro, meshes, RViz launch | ✅ ported to ament_cmake |
-| `taurob_watchdog` | watchdog server node (safety) | ⏳ to be ported |
-| `taurob_watchdog_client` | standalone watchdog client (control station, no ROS deps) | ⏳ to be ported |
+| `taurob_watchdog` | watchdog server node (safety) | ✅ ported to rclcpp |
+| `taurob_watchdog_client` | standalone watchdog client (control station, no ROS deps) | ✅ ported to ament_cmake |
 | `taurob_tracker_hardware` | ros2_control hardware interfaces (base, arm, flipper, claw) | 🚧 planned |
 | `taurob_bringup` | ROS 2 launch files + controller configs | 🚧 planned |
 

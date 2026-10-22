@@ -23,20 +23,20 @@ jobs:
         run: |
           apt-get update -qq
           rosdep update
-          rosdep install --from-paths libtaurob taurob_tracker_description --ignore-src -y --rosdistro jazzy
+          rosdep install --from-paths libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client --ignore-src -y --rosdistro jazzy
 
       # Build only the packages already ported to ROS 2/ament; the remaining
       # watchdog packages are still catkin and are ported in Phase 2.
       - name: Build
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --packages-select libtaurob taurob_tracker_description --event-handlers console_direct+
+          colcon build --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client --event-handlers console_direct+
 
       - name: Test
         run: |
           source /opt/ros/jazzy/setup.bash
           source install/setup.bash
-          colcon test --packages-select libtaurob taurob_tracker_description --event-handlers console_direct+
+          colcon test --packages-select libtaurob taurob_tracker_description taurob_watchdog taurob_watchdog_client --event-handlers console_direct+
           colcon test-result --verbose
 
   urdf_check:

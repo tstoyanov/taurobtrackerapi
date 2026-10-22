@@ -74,9 +74,9 @@ ROS 2 `ros2_control` implementation, but their code is also ROS 1 and requires f
 - [x] Add CI job (GitHub Actions) building the workspace on `ros:jazzy` base image.
 
 ### Phase 2 — Safety stack
-- [ ] Port `taurob_watchdog` (C++ node → rclcpp, `std_msgs/Bool` on `watchdog_feed`; parameters as
+- [x] Port `taurob_watchdog` (C++ node → rclcpp, `std_msgs/Bool` on `watchdog_feed`; parameters as
       ROS 2 parameters; launch file → Python).
-- [ ] Port `taurob_watchdog_client` (plain C++/CMake, no ROS dependency; only build-system cleanup).
+- [x] Port `taurob_watchdog_client` (plain C++/CMake, no ROS dependency; only build-system cleanup).
 - [ ] Integrate watchdog gate into the hardware interface `on_activate`/`write()` path: no ECU
       commands unless `watchdog_feed` pulses arrive (< 150 ms gap, as in ROS 1 implementation).
 

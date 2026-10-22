@@ -68,3 +68,54 @@ jobs:
           grep -q "<robot" /tmp/tracker.urdf
           xacro taurob_tracker_description/urdf/tracker_arm.urdf.xacro > /tmp/tracker_arm.urdf
           grep -q "<robot" /tmp/tracker_arm.urdf
+
+  watchdog_test:
+    runs-on: ubuntu-latest
+    container:
+      image: ros:jazzy
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update -qq
+          rosdep update
+          rosdep install --from-paths libtaurob taurob_watchdog taurob_watchdog_client --ignore-src -y --rosdistro jazzy
+
+      - name: Build
+        run: |
+          . /opt/ros/jazzy/setup.bash
+          colcon build --packages-select libtaurob taurob_watchdog taurob_watchdog_client --event-handlers console_direct+
+
+      - name: Watchdog feeds while client is running
+        run: |
+          . install/setup.bash
+          ros2 run taurob_watchdog taurob_watchdog_node > /tmp/watchdog_node.log 2>&1 &
+          NODE_PID=$!
+          # keep the client's stdin open for 10 s so it keeps sending TWF pulses
+          sleep 10 | ros2 run taurob_watchdog_client taurob_watchdog_client 127.0.0.1 &
+          CLIENT_PID=$!
+          sleep 2
+          FEED=$(timeout 5 ros2 topic echo --once /watchdog_feed --field data)
+          echo "watchdog_feed: $FEED"
+          kill $CLIENT_PID $NODE_PID
+          [[ "$FEED" == "true" ]] || { echo "FAIL: expected watchdog_feed true"; cat /tmp/watchdog_node.log; exit 1; }
+
+      - name: Watchdog stops feeding after client exits
+        run: |
+          . install/setup.bash
+          ros2 run taurob_watchdog taurob_watchdog_node > /tmp/watchdog_node2.log 2>&1 &
+          NODE_PID=$!
+          # client with immediate EOF on stdin: sends pulses only briefly
+          ros2 run taurob_watchdog_client taurob_watchdog_client 127.0.0.1 < /dev/null &
+          sleep 1
+          # after the pulses stop, no new watchdog_feed message may arrive
+          if timeout 3 ros2 topic echo --once /watchdog_feed --field data; then
+            echo "FAIL: watchdog still feeding after client stopped"; cat /tmp/watchdog_node2.log; kill $NODE_PID; exit 1
+          fi
+          kill $NODE_PID
+          echo "PASS: watchdog ceased to feed after client stopped"

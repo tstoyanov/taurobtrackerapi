@@ -77,6 +77,12 @@ def generate_launch_description():
         arguments=['flipper_controller', '--controller-manager', '/controller_manager'],
     )
 
+    claw_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['claw_controller', '--controller-manager', '/controller_manager'],
+    )
+
     watchdog_node = Node(
         package='taurob_watchdog',
         executable='taurob_watchdog_node',
@@ -92,4 +98,5 @@ def generate_launch_description():
             diff_drive_spawner,
             arm_spawner,
             flipper_spawner,
+            claw_spawner,
         ])

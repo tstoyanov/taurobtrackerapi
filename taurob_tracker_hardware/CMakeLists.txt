@@ -53,6 +53,16 @@ target_include_directories(tracker_flipper_hardware PUBLIC
 )
 pluginlib_export_plugin_description_file(hardware_interface tracker_flipper_hardware.xml)
 
+add_library(tracker_claw_hardware
+  src/tracker_claw_hardware.cpp
+)
+ament_target_dependencies(tracker_claw_hardware ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_include_directories(tracker_claw_hardware PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+pluginlib_export_plugin_description_file(hardware_interface tracker_claw_hardware.xml)
+
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   ament_add_gmock(test_tracker_base_system test/test_tracker_base_system.cpp)
@@ -78,13 +88,13 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
-install(TARGETS tracker_base_system tracker_arm_hardware tracker_flipper_hardware
+install(TARGETS tracker_base_system tracker_arm_hardware tracker_flipper_hardware tracker_claw_hardware
   EXPORT export_taurob_tracker_hardware
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
-install(FILES tracker_base_system.xml tracker_arm_hardware.xml tracker_flipper_hardware.xml
+install(FILES tracker_base_system.xml tracker_arm_hardware.xml tracker_flipper_hardware.xml tracker_claw_hardware.xml
   DESTINATION share/${PROJECT_NAME}
 )
 

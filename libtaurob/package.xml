@@ -17,6 +17,7 @@
   <depend>libboost-thread-dev</depend>
   <depend>libboost-system-dev</depend>
   <depend>libboost-date-time-dev</depend>
+  <depend>libboost-regex-dev</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

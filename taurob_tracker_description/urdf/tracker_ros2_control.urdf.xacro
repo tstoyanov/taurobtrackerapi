@@ -44,6 +44,27 @@
       </joint>
     </ros2_control>
 
+    <!-- Claw: rotation and grip position joints plus grip force sensor -->
+    <ros2_control name="tracker_claw" type="system">
+      <hardware>
+        <plugin>taurob_tracker_hardware/TrackerClawHardware</plugin>
+        <param name="claw_ip">10.0.0.2</param>
+        <param name="claw_port">10003</param>
+        <param name="watchdog_enabled">${watchdog_enabled}</param>
+      </hardware>
+      <joint name="claw_rotation">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+      </joint>
+      <joint name="claw_grip">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+      </joint>
+      <sensor name="claw_force_sensor">
+        <state_interface name="force"/>
+      </sensor>
+    </ros2_control>
+
     <!-- Arm: per-joint ECU addresses follow the ROS 1 tracker.yaml calibration
          format name:ip:port:offset -->
     <ros2_control name="tracker_arm" type="system">

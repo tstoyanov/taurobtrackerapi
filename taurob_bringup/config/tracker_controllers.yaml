@@ -14,6 +14,9 @@ controller_manager:
     flipper_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
+    claw_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
 diff_drive_controller:
   ros__parameters:
     left_wheel_names: ["track_left"]
@@ -43,6 +46,17 @@ flipper_controller:
   ros__parameters:
     joints:
       - flipper_front
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+    allow_partial_joints_goal: true
+
+claw_controller:
+  ros__parameters:
+    joints:
+      - claw_rotation
+      - claw_grip
     command_interfaces:
       - position
     state_interfaces:

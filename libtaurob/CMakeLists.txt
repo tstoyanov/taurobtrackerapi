@@ -26,6 +26,8 @@ add_library(libtaurob SHARED
   src/Arm_frames.cpp
   src/Arm_segment.cpp
   src/Base_frames.cpp
+  src/Claw.cpp
+  src/Claw_frames.cpp
   src/flipper.cpp
   src/flipper_frames.cpp
   src/libtaurob_base.cpp
@@ -50,6 +52,7 @@ target_link_libraries(libtaurob
   boost_thread
   boost_system
   boost_date_time
+  boost_regex
 )
 
 install(TARGETS libtaurob

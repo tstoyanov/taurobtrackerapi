@@ -1,0 +1,7 @@
+<library path="tracker_claw_hardware">
+  <class name="taurob_tracker_hardware/TrackerClawHardware"
+         type="taurob_tracker_hardware::TrackerClawHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>Taurob claw (rotation and grip position joints + force sensor) via libtaurob.</description>
+  </class>
+</library>

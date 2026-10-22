@@ -159,6 +159,12 @@ jobs:
       - name: Hardware plugins load from the URDF
         run: |
           . install/setup.bash
+          # stage hector_xacro_tools (ROS 1 catkin package of pure xacro macros)
+          git clone --depth 1 https://github.com/tu-darmstadt-ros-pkg/hector_models.git /tmp/hector_models
+          mkdir -p install/hector/share/ament_index/resource_index/packages
+          touch install/hector/share/ament_index/resource_index/packages/hector_xacro_tools
+          cp -r /tmp/hector_models/hector_xacro_tools install/hector/share/
+          export AMENT_PREFIX_PATH=$PWD/install/hector:$AMENT_PREFIX_PATH
           xacro $(ros2 pkg prefix taurob_tracker_description)/share/taurob_tracker_description/urdf/tracker.urdf.xacro watchdog_enabled:=false > /tmp/tracker.urdf
           # the controller manager must load all four taurob hardware plugins;
           # without an ECU they cannot be activated, so only configure (load) them

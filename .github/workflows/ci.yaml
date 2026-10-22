@@ -103,13 +103,20 @@ jobs:
           FEED=$(timeout 5 ros2 topic echo --once /watchdog_feed --field data)
           echo "watchdog_feed: $FEED"
           kill $CLIENT_PID $NODE_PID
+          pkill -f taurob_watchdog_client || true
+          pkill -f taurob_watchdog_node || true
           echo "$FEED" | grep -qw True || { echo "FAIL: expected watchdog_feed True"; cat /tmp/watchdog_node.log; exit 1; }
 
       - name: Watchdog stops feeding after client exits
         run: |
           . install/setup.bash
+          pkill -f taurob_watchdog_node || true
+          sleep 1
           ros2 run taurob_watchdog taurob_watchdog_node > /tmp/watchdog_node2.log 2>&1 &
           NODE_PID=$!
+          sleep 2
+          # the node must own UDP port 19090; a lingering instance would fail the bind
+          ! grep -q "Address already in use" /tmp/watchdog_node2.log || { echo "FAIL: watchdog node could not bind"; cat /tmp/watchdog_node2.log; exit 1; }
           # client with immediate EOF on stdin: sends pulses only briefly
           ros2 run taurob_watchdog_client taurob_watchdog_client 127.0.0.1 < /dev/null &
           sleep 1
@@ -118,4 +125,5 @@ jobs:
             echo "FAIL: watchdog still feeding after client stopped"; cat /tmp/watchdog_node2.log; kill $NODE_PID; exit 1
           fi
           kill $NODE_PID
+          pkill -f taurob_watchdog_node || true
           echo "PASS: watchdog ceased to feed after client stopped"

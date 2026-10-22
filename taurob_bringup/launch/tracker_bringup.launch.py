@@ -6,6 +6,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -35,7 +36,7 @@ def generate_launch_description():
             ' watchdog_enabled:=', watchdog_enabled,
             ' base_ip:=', base_ip,
         ])
-    robot_description = {'robot_description': robot_description_content}
+    robot_description = {'robot_description': ParameterValue(robot_description_content, value_type=str)}
 
     controllers_file = os.path.join(bringup_share, 'config', 'tracker_controllers.yaml')
 

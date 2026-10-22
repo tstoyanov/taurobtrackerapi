@@ -57,7 +57,8 @@ Taurob_base::Taurob_base(std::string host_ip,
     cooldown_active(0),
     cooldown_time(boost::posix_time::time_from_string("1970-01-01 00:00:00.000")),
     latest_watchdog_time(boost::posix_time::time_from_string("1970-01-01 00:00:00.000")),
-    sending_thread_running(false)
+    sending_thread_running(false),
+    ecu_socket(0)
 { 
 
 }
@@ -154,10 +155,18 @@ void Taurob_base::Run()
 /** Stops communicating with the drivetrain u-ecu via UDP*/
 void Taurob_base::Stop()
 {
+    if (ecu_socket == 0)
+    {
+        return;
+    }
+
     sending_thread_running = false;
 
     printf("[Base ECU] Stopping - Waiting for threads to join...\n");
-    sending_thread.join();
+    if (sending_thread.joinable())
+    {
+        sending_thread.join();
+    }
     printf("[Base ECU] ECUClient::run() completed\n");
 
     ecu_socket->stop_listen();

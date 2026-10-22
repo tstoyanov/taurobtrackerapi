@@ -115,7 +115,7 @@ class IReceiveCallback
 class Arm_segment : IUdpReceiverBinary
 {
 	public:
-        static const int DEFAULT_MAX_INPUT_VALUE = 4095;
+        static constexpr int DEFAULT_MAX_INPUT_VALUE = 4095;
 
         Arm_segment(std::string segment_name,
 					std::string host_ip, 
@@ -143,9 +143,9 @@ class Arm_segment : IUdpReceiverBinary
         void produce_connection_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
 
 	private:        
-        static const int MAX_CONNECTION_LOSS_TIME_MS = 250;
-        static const int SENDING_THREAD_PERIOD_MS = 20;
-        static const int RESET_FRICTION_CLUTCH_FRAMES = 10;
+        static constexpr int MAX_CONNECTION_LOSS_TIME_MS = 250;
+        static constexpr int SENDING_THREAD_PERIOD_MS = 20;
+        static constexpr int RESET_FRICTION_CLUTCH_FRAMES = 10;
 
 		std::string segment_name;
 		std::string host_ip;
@@ -208,8 +208,8 @@ class Arm : IReceiveCallback
         void produce_clutch_diagnostics(int segment_number, diagnostic_updater::DiagnosticStatusWrapper& stat);
 
     private:        
-        static const int WATCHDOG_MAX_TIME_MS = 250;
-        static const int WATCHDOG_CHECKER_THREAD_PERIOD_MS = 5;
+        static constexpr int WATCHDOG_MAX_TIME_MS = 250;
+        static constexpr int WATCHDOG_CHECKER_THREAD_PERIOD_MS = 5;
 
         bool config_successful;
         std::vector<Arm_segment*> segments;

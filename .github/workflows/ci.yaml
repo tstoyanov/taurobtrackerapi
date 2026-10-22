@@ -103,7 +103,7 @@ jobs:
           FEED=$(timeout 5 ros2 topic echo --once /watchdog_feed --field data)
           echo "watchdog_feed: $FEED"
           kill $CLIENT_PID $NODE_PID
-          [[ "$FEED" == "true" ]] || { echo "FAIL: expected watchdog_feed true"; cat /tmp/watchdog_node.log; exit 1; }
+          [[ "$FEED" == "True" ]] || { echo "FAIL: expected watchdog_feed True"; cat /tmp/watchdog_node.log; exit 1; }
 
       - name: Watchdog stops feeding after client exits
         run: |

@@ -10,9 +10,13 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>rclcpp</build_depend>
-  <build_depend>diagnostic_updater</build_depend>
-  <build_depend>diagnostic_msgs</build_depend>
+  <depend>rclcpp</depend>
+  <depend>diagnostic_updater</depend>
+  <depend>diagnostic_msgs</depend>
+  <depend>libboost-dev</depend>
+  <depend>libboost-thread-dev</depend>
+  <depend>libboost-system-dev</depend>
+  <depend>libboost-date-time-dev</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -77,8 +77,9 @@ ROS 2 `ros2_control` implementation, but their code is also ROS 1 and requires f
 - [x] Port `taurob_watchdog` (C++ node → rclcpp, `std_msgs/Bool` on `watchdog_feed`; parameters as
       ROS 2 parameters; launch file → Python).
 - [x] Port `taurob_watchdog_client` (plain C++/CMake, no ROS dependency; only build-system cleanup).
-- [ ] Integrate watchdog gate into the hardware interface `on_activate`/`write()` path: no ECU
-      commands unless `watchdog_feed` pulses arrive (< 150 ms gap, as in ROS 1 implementation).
+- [x] Integrate watchdog gate into the hardware interface `write()` path: no ECU motion
+      commands unless `watchdog_feed` pulses arrive within the 1 s window of the
+      `taurob_watchdog` node (WatchdogGate, used by base, arm, flipper and claw).
 
 ### Phase 3 — ros2_control hardware interfaces
 - [ ] Create `taurob_tracker_hardware` package (ament_cmake, depends on `hardware_interface`,
@@ -110,22 +111,42 @@ ROS 2 `ros2_control` implementation, but their code is also ROS 1 and requires f
       - watchdog server included by default.
 - [ ] Keep `tracker.yaml.default` pattern for arm calibration to preserve user-modified files
       (currently offsets live directly in the URDF params).
-- [ ] Port smoke tests: `ros2 launch` bringup against mock ECU; `ros2 topic pub /cmd_vel` and
-      `ros2 control` command verification.
+- [x] CI smoke tests: watchdog functional test (node + real client, feed and timeout cases);
+      bringup test asserting all four hardware plugins load from the URDF and all controllers
+      are recognized by the controller manager.
 
 ### Phase 5 — Claw, teleop and peripherals
-- [ ] Use upstream `teleop_twist_joy` (ROS 2) for driving; add taurob joy config if needed.
-- [ ] Port `libtaurob_claw` from the ROS 1 `master` branch into `libtaurob` and add a
+- [x] Teleop via `teleop_twist_joy` (ROS 2) can be used directly against
+      `/diff_drive_controller/cmd_vel_unstamped`; no taurob-specific package needed.
+- [x] Port `libtaurob_claw` from the ROS 1 `master` branch into `libtaurob` and add a
       `TrackerClawHardware` position interface (`claw_rotation`, `claw_grip`) + grip-force state.
 - [ ] Re-evaluate `taurob_relay_dropper`/`taurob_commander_switch` only on explicit request
       (smokebot-specific hardware); default: leave out of the ROS 2 stack.
 
 ### Phase 6 — Docs and release
-- [ ] Rewrite README (Jazzy): prerequisites (chrony NTP sync, `hector_xacro_tools`), build
-      instructions, launch instructions, controller cheatsheet (`ros2 topic pub /cmd_vel ...`,
-      `ros2 control load_start_controller ...`), battery-voltage safety warnings, watchdog usage.
-- [ ] Remove the humble status tracker checklist; document package overview and deprecation notes.
+- [x] Rewrite README (Jazzy): prerequisites (chrony NTP sync, `hector_xacro_tools`), build
+      instructions, launch instructions, controller cheatsheet, battery-voltage safety warnings,
+      watchdog usage.
+- [x] Remove the humble status tracker checklist; document package overview and deprecation notes.
 - [ ] Tag a pre-release once hardware validation on a real Tracker is done (cannot be done in CI).
+
+## Real-robot validation checklist (pending, requires hardware)
+
+Execute and sign off with the robot maintainer before the first field use:
+
+1. [ ] Watchdog: client on control station feeds the server; verify `watchdog_feed` pulses and
+       that killing the client stops all actuation within the timeout.
+2. [ ] Watchdog: emergency stop (any key on the client) suspends actuation; releasing resumes.
+3. [ ] Base: drive forward/backward and turn via `/diff_drive_controller/cmd_vel_unstamped`;
+       verify odometry plausibility.
+4. [ ] Base: verify `supply_voltage` readings against a multimeter; check error codes stay 0.
+5. [ ] Arm: verify per-joint offsets/calibration against a reference pose; command a simple
+       trajectory; verify reported positions match.
+6. [ ] Flipper: command positions; verify the neutral pose semantics.
+7. [ ] Claw: rotate, grip; verify force readings.
+8. [ ] Safety stop at speed: trigger watchdog timeout while driving; verify the robot halts.
+9. [ ] Long-run: 30 min of mixed operation; watch for overcurrent/cooldown states, drops in
+       supply voltage, and lost ECU connections.
 
 ## Safety requirements carried over from ROS 1 (non-negotiable)
 1. The watchdog client must run on the control station; the watchdog server on the robot. No

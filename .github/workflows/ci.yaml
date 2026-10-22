@@ -56,9 +56,8 @@ jobs:
           apt-get update -qq
           apt-get install -y ros-jazzy-xacro git
           git clone --depth 1 https://github.com/tu-darmstadt-ros-pkg/hector_models.git /tmp/hector_models
-          mkdir -p install/taurob_tracker_description/share/taurob_tracker_description
-          cp -r taurob_tracker_description/urdf install/taurob_tracker_description/share/taurob_tracker_description/
-          export AMENT_PREFIX_PATH=$PWD/install/taurob_tracker_description/share:$AMENT_PREFIX_PATH
+          colcon build --packages-select taurob_tracker_description
+          . install/setup.bash
           xacro taurob_tracker_description/urdf/tracker.urdf.xacro > /tmp/tracker.urdf
           grep -q "<robot" /tmp/tracker.urdf
           xacro taurob_tracker_description/urdf/tracker_arm.urdf.xacro > /tmp/tracker_arm.urdf

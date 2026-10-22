@@ -12,6 +12,8 @@
 
 namespace taurob_tracker_hardware
 {
+namespace { rclcpp::Logger trackerbasesystem_logger() { return rclcpp::get_logger("TrackerBaseSystem"); } }
+
 
 DRIVETRAIN_STATUS TrackerBaseSystem::latest_status_ = DRIVETRAIN_STATUS();
 
@@ -23,12 +25,11 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_init(
   {
     return hardware_interface::CallbackReturn::ERROR;
   }
-  logger_ = rclcpp::get_logger("TrackerBaseSystem");
 
   if (info_.joints.size() != 2)
   {
     RCLCPP_ERROR(
-      logger_, "expected exactly 2 wheel joints (left, right), got %zu", info_.joints.size());
+      trackerbasesystem_logger(), "expected exactly 2 wheel joints (left, right), got %zu", info_.joints.size());
     return hardware_interface::CallbackReturn::ERROR;
   }
   for (const auto & joint : info_.joints)
@@ -37,7 +38,7 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_init(
       joint.command_interfaces[0].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_ERROR(
-        logger_, "joint '%s' must have exactly one velocity command interface",
+        trackerbasesystem_logger(), "joint '%s' must have exactly one velocity command interface",
         joint.name.c_str());
       return hardware_interface::CallbackReturn::ERROR;
     }
@@ -46,7 +47,7 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_init(
       joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_ERROR(
-        logger_, "joint '%s' must have position and velocity state interfaces", joint.name.c_str());
+        trackerbasesystem_logger(), "joint '%s' must have position and velocity state interfaces", joint.name.c_str());
       return hardware_interface::CallbackReturn::ERROR;
     }
   }
@@ -91,7 +92,7 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_init(
   watchdog_enabled_ = (watchdog != "false");
 
   RCLCPP_INFO(
-    logger_, "base ECU at %s:%d (protocol v%d)", base_ip_.c_str(), base_port_, protocol_version_);
+    trackerbasesystem_logger(), "base ECU at %s:%d (protocol v%d)", base_ip_.c_str(), base_port_, protocol_version_);
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -103,7 +104,7 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_activate(
     base_ip_, base_port_, gear_ratio_, wheel_diameter_, track_width_, turning_geometry_factor_);
   base_->Set_on_received_callback(&TrackerBaseSystem::on_status_received);
   base_->Run();
-  RCLCPP_INFO(logger_, "base platform activated");
+  RCLCPP_INFO(trackerbasesystem_logger(), "base platform activated");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -116,7 +117,7 @@ hardware_interface::CallbackReturn TrackerBaseSystem::on_deactivate(
     base_->Stop();
     base_.reset();
   }
-  RCLCPP_INFO(logger_, "base platform deactivated");
+  RCLCPP_INFO(trackerbasesystem_logger(), "base platform deactivated");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 

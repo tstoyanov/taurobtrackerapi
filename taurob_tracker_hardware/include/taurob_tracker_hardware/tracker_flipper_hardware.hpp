@@ -58,7 +58,6 @@ private:
   int flipper_port_ = 10002;
 
   std::unique_ptr<Flipper> flipper_;
-  rclcpp::Logger logger_;
 };
 
 }  // namespace taurob_tracker_hardware

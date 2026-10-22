@@ -8,6 +8,8 @@
 
 namespace taurob_tracker_hardware
 {
+namespace { rclcpp::Logger trackerflipperhardware_logger() { return rclcpp::get_logger("TrackerFlipperHardware"); } }
+
 
 hardware_interface::CallbackReturn TrackerFlipperHardware::on_init(
   const hardware_interface::HardwareInfo & info)
@@ -17,11 +19,10 @@ hardware_interface::CallbackReturn TrackerFlipperHardware::on_init(
   {
     return hardware_interface::CallbackReturn::ERROR;
   }
-  logger_ = rclcpp::get_logger("TrackerFlipperHardware");
 
   if (info_.joints.size() != 1)
   {
-    RCLCPP_ERROR(logger_, "expected exactly 1 flipper joint, got %zu", info_.joints.size());
+    RCLCPP_ERROR(trackerflipperhardware_logger(), "expected exactly 1 flipper joint, got %zu", info_.joints.size());
     return hardware_interface::CallbackReturn::ERROR;
   }
   const auto & joint = info_.joints[0];
@@ -29,7 +30,7 @@ hardware_interface::CallbackReturn TrackerFlipperHardware::on_init(
     joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION)
   {
     RCLCPP_ERROR(
-      logger_, "joint '%s' must have exactly one position command interface", joint.name.c_str());
+      trackerflipperhardware_logger(), "joint '%s' must have exactly one position command interface", joint.name.c_str());
     return hardware_interface::CallbackReturn::ERROR;
   }
 
@@ -52,7 +53,7 @@ hardware_interface::CallbackReturn TrackerFlipperHardware::on_activate(
 {
   flipper_ = std::make_unique<Flipper>(flipper_ip_, flipper_port_);
   flipper_->Run();
-  RCLCPP_INFO(logger_, "flipper activated at %s:%d", flipper_ip_.c_str(), flipper_port_);
+  RCLCPP_INFO(trackerflipperhardware_logger(), "flipper activated at %s:%d", flipper_ip_.c_str(), flipper_port_);
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -64,7 +65,7 @@ hardware_interface::CallbackReturn TrackerFlipperHardware::on_deactivate(
     flipper_->Stop();
     flipper_.reset();
   }
-  RCLCPP_INFO(logger_, "flipper deactivated");
+  RCLCPP_INFO(trackerflipperhardware_logger(), "flipper deactivated");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 

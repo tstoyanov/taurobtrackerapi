@@ -55,10 +55,8 @@ private:
   std::vector<double> hw_commands_;
   std::vector<double> joint_offsets_;
   std::vector<std::string> joint_names_;
-  std::vector<int> joint_position_tolerance_mrad_;
 
   std::unique_ptr<Arm> arm_;
-  rclcpp::Logger logger_;
 };
 
 }  // namespace taurob_tracker_hardware

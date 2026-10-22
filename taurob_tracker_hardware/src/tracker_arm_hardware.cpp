@@ -10,6 +10,13 @@
 
 namespace taurob_tracker_hardware
 {
+namespace
+{
+rclcpp::Logger arm_logger()
+{
+  return rclcpp::get_logger("TrackerArmHardware");
+}
+}  // namespace
 
 hardware_interface::CallbackReturn TrackerArmHardware::on_init(
   const hardware_interface::HardwareInfo & info)
@@ -19,24 +26,22 @@ hardware_interface::CallbackReturn TrackerArmHardware::on_init(
   {
     return hardware_interface::CallbackReturn::ERROR;
   }
-  logger_ = rclcpp::get_logger("TrackerArmHardware");
 
   if (info_.joints.empty())
   {
-    RCLCPP_ERROR(logger_, "no arm joints configured");
+    RCLCPP_ERROR(arm_logger(), "no arm joints configured");
     return hardware_interface::CallbackReturn::ERROR;
   }
 
-  arm_ = std::make_unique<Arm>();
+  Arm_config config;
 
-  size_t index = 0;
   for (const auto & joint : info_.joints)
   {
     if (joint.command_interfaces.size() != 1 ||
       joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_ERROR(
-        logger_, "joint '%s' must have exactly one position command interface",
+        arm_logger(), "joint '%s' must have exactly one position command interface",
         joint.name.c_str());
       return hardware_interface::CallbackReturn::ERROR;
     }
@@ -44,7 +49,8 @@ hardware_interface::CallbackReturn TrackerArmHardware::on_init(
       joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_ERROR(
-        logger_, "joint '%s' must have exactly one position state interface", joint.name.c_str());
+        arm_logger(), "joint '%s' must have exactly one position state interface",
+        joint.name.c_str());
       return hardware_interface::CallbackReturn::ERROR;
     }
 
@@ -70,15 +76,15 @@ hardware_interface::CallbackReturn TrackerArmHardware::on_init(
       offset = std::stod(joint.parameters.at("offset"));
     }
 
-    arm_->Add_segment(joint.name, ip, port, tolerance_mrad);
+    config.Add_segment(joint.name, ip, port, tolerance_mrad);
     joint_names_.push_back(joint.name);
     joint_offsets_.push_back(offset);
-    joint_position_tolerance_mrad_.push_back(tolerance_mrad);
-    ++index;
   }
 
   hw_positions_.resize(info_.joints.size(), 0.0);
   hw_commands_.resize(info_.joints.size(), 0.0);
+
+  arm_ = std::make_unique<Arm>(config);
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -87,7 +93,7 @@ hardware_interface::CallbackReturn TrackerArmHardware::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
   arm_->Run();
-  RCLCPP_INFO(logger_, "arm activated with %zu segments", joint_names_.size());
+  RCLCPP_INFO(arm_logger(), "arm activated with %zu segments", joint_names_.size());
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -95,7 +101,7 @@ hardware_interface::CallbackReturn TrackerArmHardware::on_deactivate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
   arm_->Stop();
-  RCLCPP_INFO(logger_, "arm deactivated");
+  RCLCPP_INFO(arm_logger(), "arm deactivated");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -137,6 +143,7 @@ hardware_interface::return_type TrackerArmHardware::read(
     ARM_SEGMENT_STATUS status = arm_->Get(static_cast<int>(i));
     hw_positions_[i] = static_cast<double>(status.position) - joint_offsets_[i];
   }
+  arm_->Feed_watchdog();
   return hardware_interface::return_type::OK;
 }
 
@@ -146,10 +153,18 @@ hardware_interface::return_type TrackerArmHardware::write(
   for (size_t i = 0; i < joint_names_.size(); ++i)
   {
     ARM_SEGMENT_COMMAND command;
-    command.mode = POSITION_CONTROL;
+    command.state = POSITION_CONTROL;
     command.set_position = static_cast<float>(hw_commands_[i] + joint_offsets_[i]);
+    command.max_speed = 0.0f;
+    command.set_speed = 0.0f;
+    command.reset_friction_clutch = false;
+    command.control_aux_port = false;
+    command.enable_five_volt = false;
+    command.enable_twelve_volt = false;
+    command.enable_dig_out_1 = false;
+    command.enable_dig_out_2 = false;
+    command.reset_u_ecu = false;
     arm_->Set(static_cast<int>(i), command);
-    arm_->Feed_watchdog();
   }
   return hardware_interface::return_type::OK;
 }

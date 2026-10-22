@@ -91,7 +91,6 @@ private:
   bool watchdog_ok_ = false;
 
   std::unique_ptr<Taurob_base> base_;
-  rclcpp::Logger logger_;
 };
 
 }  // namespace taurob_tracker_hardware

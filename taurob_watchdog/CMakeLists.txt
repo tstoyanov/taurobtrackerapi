@@ -15,6 +15,12 @@ add_executable(taurob_watchdog_node
   src/taurob_watchdog_node.cpp
 )
 
+ament_target_dependencies(taurob_watchdog_node
+  rclcpp
+  std_msgs
+  libtaurob
+)
+
 target_link_libraries(taurob_watchdog_node
   libtaurob
   boost_system

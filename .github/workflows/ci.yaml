@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ros:jazzy
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ros:jazzy
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4

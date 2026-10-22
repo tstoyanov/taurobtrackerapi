@@ -17,6 +17,8 @@
 
 #include "libtaurob_arm/libtaurob_arm.h"
 
+#include "taurob_tracker_hardware/watchdog_gate.hpp"
+
 namespace taurob_tracker_hardware
 {
 
@@ -57,6 +59,8 @@ private:
   std::vector<std::string> joint_names_;
 
   std::unique_ptr<Arm> arm_;
+  bool watchdog_enabled_ = true;
+  std::shared_ptr<WatchdogGate> watchdog_gate_;
 };
 
 }  // namespace taurob_tracker_hardware

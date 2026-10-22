@@ -17,6 +17,8 @@
 
 #include "libtaurob_flipper/libtaurob_flipper.h"
 
+#include "taurob_tracker_hardware/watchdog_gate.hpp"
+
 namespace taurob_tracker_hardware
 {
 
@@ -58,6 +60,8 @@ private:
   int flipper_port_ = 10002;
 
   std::unique_ptr<Flipper> flipper_;
+  bool watchdog_enabled_ = true;
+  std::shared_ptr<WatchdogGate> watchdog_gate_;
 };
 
 }  // namespace taurob_tracker_hardware

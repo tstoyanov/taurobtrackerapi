@@ -45,6 +45,17 @@ hardware_interface::CallbackReturn TrackerFlipperHardware::on_init(
     flipper_port_ = std::stoi(info_.hardware_parameters.at("flipper_port"));
   }
 
+  std::string watchdog = "true";
+  if (info_.hardware_parameters.count("watchdog_enabled") > 0)
+  {
+    watchdog = info_.hardware_parameters.at("watchdog_enabled");
+  }
+  watchdog_enabled_ = (watchdog != "false");
+  if (watchdog_enabled_)
+  {
+    watchdog_gate_ = std::make_shared<WatchdogGate>();
+  }
+
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -117,7 +128,15 @@ hardware_interface::return_type TrackerFlipperHardware::write(
     return hardware_interface::return_type::ERROR;
   }
   FlipperCommand command;
-  command.angle = hw_command_;
+  if (watchdog_enabled_ && !(watchdog_gate_ && watchdog_gate_->is_ok()))
+  {
+    // do not move while the safety watchdog is not fed; hold current angle
+    command.angle = hw_position_;
+  }
+  else
+  {
+    command.angle = hw_command_;
+  }
   flipper_->Set(command);
   return hardware_interface::return_type::OK;
 }

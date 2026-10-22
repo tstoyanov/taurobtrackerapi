@@ -84,6 +84,17 @@ hardware_interface::CallbackReturn TrackerArmHardware::on_init(
   hw_positions_.resize(info_.joints.size(), 0.0);
   hw_commands_.resize(info_.joints.size(), 0.0);
 
+  std::string watchdog = "true";
+  if (info_.hardware_parameters.count("watchdog_enabled") > 0)
+  {
+    watchdog = info_.hardware_parameters.at("watchdog_enabled");
+  }
+  watchdog_enabled_ = (watchdog != "false");
+  if (watchdog_enabled_)
+  {
+    watchdog_gate_ = std::make_shared<WatchdogGate>();
+  }
+
   arm_ = std::make_unique<Arm>(config);
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -150,10 +161,17 @@ hardware_interface::return_type TrackerArmHardware::read(
 hardware_interface::return_type TrackerArmHardware::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
+  ARM_SEGMENT_STATE command_state = POSITION_CONTROL;
+  if (watchdog_enabled_ && !(watchdog_gate_ && watchdog_gate_->is_ok()))
+  {
+    // do not send motion commands while the safety watchdog is not fed
+    command_state = STOP;
+  }
+
   for (size_t i = 0; i < joint_names_.size(); ++i)
   {
     ARM_SEGMENT_COMMAND command;
-    command.state = POSITION_CONTROL;
+    command.state = command_state;
     command.set_position = static_cast<float>(hw_commands_[i] + joint_offsets_[i]);
     command.max_speed = 0.0f;
     command.set_speed = 0.0f;

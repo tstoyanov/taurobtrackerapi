@@ -202,8 +202,10 @@ TEST_F(TestFixture, BaseSystemCommandsMockEcu)
 
   const rclcpp::Time now(0, 0, RCL_ROS_TIME);
   const rclcpp::Duration dt = rclcpp::Duration::from_seconds(0.05);
-  for (int i = 0; i < 20 && (ecu_->commanded_y() <= 0.0); ++i)
+  for (int i = 0; i < 30 && (ecu_->commanded_y() <= 0.0); ++i)
   {
+    // read() feeds the libtaurob internal 250 ms watchdog
+    ASSERT_EQ(base->read(now, dt), hardware_interface::return_type::OK);
     ASSERT_EQ(base->write(now, dt), hardware_interface::return_type::OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -215,8 +217,9 @@ TEST_F(TestFixture, BaseSystemCommandsMockEcu)
   // turning: opposite velocities => non-zero x, zero y
   commands[0].set_value(1.0);
   commands[1].set_value(-1.0);
-  for (int i = 0; i < 20 && (std::abs(ecu_->commanded_x()) <= 0.0); ++i)
+  for (int i = 0; i < 30 && (std::abs(ecu_->commanded_x()) <= 0.0); ++i)
   {
+    ASSERT_EQ(base->read(now, dt), hardware_interface::return_type::OK);
     ASSERT_EQ(base->write(now, dt), hardware_interface::return_type::OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -255,6 +258,7 @@ TEST_F(TestFixture, BaseSystemBlocksCommandsWhenWatchdogNotFed)
   const rclcpp::Duration dt = rclcpp::Duration::from_seconds(0.05);
   for (int i = 0; i < 10; ++i)
   {
+    ASSERT_EQ(base->read(now, dt), hardware_interface::return_type::OK);
     ASSERT_EQ(base->write(now, dt), hardware_interface::return_type::OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }

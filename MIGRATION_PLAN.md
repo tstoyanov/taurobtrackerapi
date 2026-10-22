@@ -68,10 +68,10 @@ ROS 2 `ros2_control` implementation, but their code is also ROS 1 and requires f
 - [x] Update top-level README: ROS 2 Jazzy-only, build with `colcon build`.
 
 ### Phase 1 — Foundation
-- [ ] Verify/patch `libtaurob` builds on Jazzy (rclcpp API drift from Humble; check deprecation
+- [x] Verify/patch `libtaurob` builds on Jazzy (rclcpp API drift from Humble; check deprecation
       warnings, `diagnostic_updater` availability).
-- [ ] Verify `taurob_tracker_description` builds and `visualize.launch.py` works on Jazzy.
-- [ ] Add CI job (GitHub Actions) building the workspace on `ros:jazzy` base image.
+- [x] Verify `taurob_tracker_description` builds and `visualize.launch.py` works on Jazzy.
+- [x] Add CI job (GitHub Actions) building the workspace on `ros:jazzy` base image.
 
 ### Phase 2 — Safety stack
 - [ ] Port `taurob_watchdog` (C++ node → rclcpp, `std_msgs/Bool` on `watchdog_feed`; parameters as

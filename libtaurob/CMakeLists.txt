@@ -1,19 +1,15 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(libtaurob)
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
-  
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
-
-set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 find_package(ament_cmake REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED)
 
 # Convenience variable for dependencies
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -55,8 +51,6 @@ target_link_libraries(libtaurob
   boost_system
   boost_date_time
 )
-
-#ament_target_dependencies (libtaurob diagnostic_updater)
 
 install(TARGETS libtaurob
   EXPORT export_libtaurob

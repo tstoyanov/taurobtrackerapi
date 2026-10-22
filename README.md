@@ -1,26 +1,45 @@
 # taurobtrackerapi
 
-This repository contains drivers for the taurob tracker robot system.
+This repository contains drivers for the taurob tracker robot system, being ported to **ROS 2 Jazzy**.
 
-## Porting WIP
+## Status
 
-Currently we are porting this repo to ros2 humble. Below notes of progress.
+The old ROS 1 native-interface driver nodes (`taurob_base_node`, `taurob_arm_node`,
+`taurob_flipper_node`, `taurob_commander_switch`, `taurob_relay_dropper`, `taurob_teleop_twist_joy`)
+are **deprecated and removed**. The ROS 2 stack is being rebuilt around
+[ros2_control](https://control.ros.org/) hardware interfaces backed by the `libtaurob` low-level
+communication library.
 
-- [x] libtaurob/
-- [ ] taurob\_arm\_node/
-- [ ] taurob\_base\_node/
-- [ ] taurob\_commander\_switch/
-- [ ] taurob\_flipper\_node/
-- [ ] taurob\_relay\_dropper/
-- [ ] taurob\_teleop\_twist\_joy/
-- [x] taurob\_tracker\_description/
-- [ ] taurob\_watchdog/
-- [ ] taurob\_watchdog\_client/
+See [MIGRATION_PLAN.md](MIGRATION_PLAN.md) for the detailed migration plan and progress.
 
+| Package | Type | Status |
+|---|---|---|
+| `libtaurob` | low-level U-ECU communication library (arm, base, flipper, sockets) | ✅ ported to ament_cmake |
+| `taurob_tracker_description` | URDF/xacro, meshes, RViz launch | ✅ ported to ament_cmake |
+| `taurob_watchdog` | watchdog server node (safety) | ⏳ to be ported |
+| `taurob_watchdog_client` | standalone watchdog client (control station, no ROS deps) | ⏳ to be ported |
+| `taurob_tracker_hardware` | ros2_control hardware interfaces (base, arm, flipper, claw) | 🚧 planned |
+| `taurob_bringup` | ROS 2 launch files + controller configs | 🚧 planned |
+
+## Target architecture
+
+All hardware access goes through `ros2_control`:
+
+* **Base platform** — diff-drive velocity commands and odometry via `diff_drive_controller`;
+  battery voltage, temperature, error codes and IMU exposed as sensor/GPIO interfaces.
+* **Arm / flippers / claw** — position-controlled joints via `joint_trajectory_controller` /
+  gripper controllers, with per-joint offset calibration (YAML), same semantics as the old
+  `taurob_arm_node` calibration files.
+* **Safety** — the watchdog server (robot) + watchdog client (control station) gate all actuation:
+  if no watchdog pulse arrives within 150 ms, the hardware interfaces stop communicating with the
+  robot, bringing it to a safe halted state.
 
 ## Prerequisites
 
-* The clocks of the control units inside the robot need to be synchronized via NTP with the computer that is running the ROS stack. Different Linux distributions provide different NTP server packages, below is a working example configuration for the [chrony](https://chrony.tuxfamily.org/) server:
+* ROS 2 Jazzy with `ros2_control` (`ros-jazzy-ros2-control`, `ros-jazzy-ros2-controllers`).
+* The clocks of the control units inside the robot need to be synchronized via NTP with the
+  computer running the ROS stack. Example chrony server configuration:
+
 ```
 server ntp.ubuntu.com iburst
 
@@ -29,127 +48,57 @@ allow 10.0.0.0/24
 
 local stratum 10
 ```
-Chrony can then be started with the following command: `chronyd -n -f chrony.conf`.
 
-* The URDF model in this repository depends on the `hector_xacro_tools` package which can be found [here](https://github.com/tu-darmstadt-ros-pkg/hector_models).
+Start with: `chronyd -n -f chrony.conf`.
 
-## Compilation and setup
+* The URDF model in this repository depends on
+  [hector_xacro_tools](https://github.com/tu-darmstadt-ros-pkg/hector_models).
 
-Simply place the packages in your ROS workspace, and compile it using `catkin build`.
+## Compilation
 
-## Available features
+Place the packages in your ROS 2 workspace and build with `colcon`:
 
-There are three basic components of our ROS package suite:
-
- * Base platform. Commands to move the robot, i.e., drive its tracks, are available. The base platform also offers status information such as odometry, battery voltage, current consumption (motors), and on-board temperature.
- 
- * Arm control. Each arm joint may be moved independently, and reports its current angle.
-
- * Emergency stop. For safety reasons, a special package offers emergency-stop functionality. This must run on a remote computer (i.e., the control station), not the robot itself.
-
-*WARNING:* Using the emergency stop package as detailed in this readme is *mandatory* for operating the robot with ROS! If you need a different implementation of the emergency stop for your project, please contact taurob. 
-
-*WARNING:* Do not attempt to run multiple instances of any node! The resulting actions are unforeseeable. Also do not try to use ROS and the taurob Commander software together.
-
-## Package overview
-
-This repository contains the following packages:
-
-### taurob_arm_node 
-
-Communicates with the individual arm joints, and offers arm control via sensor_msgs/JointState messages.
-
-*Publishes:*
-
- * `joint_states` (sensor_msgs/JointState) - The current angle of each arm segment. Only the "position" member is defined! The joint names follow the scheme "arm_joint_n", where n is the joint number. The base joint is number 0, increasing with each subsequent joint.
-
-*Subscribes:*
-
- * `jointstate_cmd` (sensor_msgs/JointState) - The desired angle for each arm joint. Only the "position" member is defined, which is the desired position in rad. You do not need to specify all joint positions, it suffices to define those you whish to change. The joint names follow the scheme "arm_joint_n", where n is the joint number. The base joint is number 0, increasing with each subsequent joint.
-
- * `watchdog_feed` (std_msgs/Bool) - Used for the emergency stop. If the node does not receive a watchdog message within a defined interval, it will stop any movement. Do not use for other purposes, and do not publish custom messages on this topic.
-
-### taurob_base_node 
-
-Handles communication with the robot's base platform.
-
-*Publishes:*
- * `odom` (nav_msgs/Odometry) - Odometry of the robot's tracks.
-
- * `supply_voltage` (std_msgs/Float32) - Supply voltage of the robot's battery. Should always be between 23 and 28V. Note that the voltage will drop in high-load scenarios such as stair-climbing. Stop using the robot if the voltage drops below 23V permanently, and load its battery to avoid damage (deep discharge).
-
- * `error_code` (std_msgs/Byte) - An internal error code. Reads 0 if no error is present. If any other value is published, stop using the robot and contact taurob, describing the circumstances under which the error occured.
-
- * `remaining_optime` (std_msgs/Float32) - The remainin operational time of the robot, calculated based on the supply voltage. This is for informal purposes only. Always use the supply voltage directly to determine if the battery is critically low.
-	
-*Subscribes:*
-	
- * `cmd_vel` (geometry_msgs/Twist) - Steer the robot with the specified velocity in x and y directions (forward/backward, left/right). Only the "linear.x" (forward/backward movement) and "angular.z" (rotation around z axis) are defined and interpreted.
-	
- * `jointstate_cmd` (sensor_msgs/JointState) - Control the robot's flippers using a JointState message with joint name "flipper_front". Only the position member is used, where 0 indicates the neutral pose. Note that the "neutral pose" for the flippers is the one they had when the robot was switched on.
-
- * `watchdog_feed` (std_msgs/Bool) - Used for the emergency stop. If the node doesn't receive a watchdog message within a defined interval, it will stop any movement. Do not use for other purposes, and do not publish custom messages on this topic. 
-
-### taurob_flipper_node
-
-Handles communication with the robot's flipper.
-
-*Publishes:*
-
- * `joint_states` (sensor_msgs/JointState) - The current angle of the flipper. Only the "position" member is defined!
-
-*Subscribes:*
-
- * `jointstate_cmd` (sensor_msgs/JointState) - The desired angle for the flipper.
-
- * `watchdog_feed` (std_msgs/Bool) - Used for the emergency stop. If the node does not receive a watchdog message within a defined interval, it will stop any movement. Do not use for other purposes, and do not publish custom messages on this topic.
-
-### taurob_watchdog 
-
-Watchdog server that listens for messages from an external watchdog client, and relays them to a ROS message.
-
-*Publishes:*
-
- * `watchdog_feed` (std_msgs/Bool) - If published, signals that a watchdog pulse was received. As soon as that pulse is absent for more than 150ms, the taurob nodes will stop communicating with the robot, bringing it to a safe halted state.
-
-### taurob_watchdog_client 
-
-Client program for the watchdog that remotely feeds the watchdog server. Is supposed to run on an external system, it has no dependencies to ROS and may be compiled and run as a stand-alone program outside the ROS workspace.
-
-## Package configuration
-
-The individual packages offer configuration options via ROS parameters. They can be set in the individual launchfiles, or a dedicated config file. The relevant files and options are as follows:
-
- * taurob_arm_node/config/tracker_arm.yaml: A dedicated configuration file for the arm. The only interesting parameter here is an offset, that can be configured for each arm joint individually (in rad). The file format is documented there.
-
- * taurob_base_node/launch/tracker_base.launch: The parameters are set in this launchfile. They are:	
-   - publish_tf (bool): Whether or not the node should publish a tf from the <tf_from_frame> to the <tf_to_frame>, representing the odometry of the platform.
-   - tf_from_frame (string): Name of the tf source frame (if applicable).
-   - tf_to_frame (string): Name of the tf target frame (if applicable).
-   - base_ip (string): IP address of the robot's base platform ECU.
-   - base_port (int): Port number of the robot's base platform ECU.
-
-Other parameters exist, but they are not relevant to the user. Do not change any parameters not mentioned here.
-
-## Starting the nodes
-
-**IMPORTANT:** If your robot has an arm, it MUST be calibrated before using it with ROS! See the previous section "Package configuration". If you are not sure what to do, please contact taurob.
-
-The taurob_tracker_description packages offers example launch files to start all robot components. It merely references the launch files in the individual packages, it is therefore recommended not to edit the launch files. To start a launch file, use the following command:
-
-```
-roslaunch taurob_tracker_description <name of the launch file>
+```bash
+colcon build
+source install/setup.bash
 ```
 
-Three launch files included:
- * tracker_model_rviz.launch: Loads the URDF model of the robot and makes it possible to view it in rviz. (No real robot is needed to start this file.)
- * tracker_passive.launch: Loads the URDF model and starts the ROS drivers, but does not start the watchdog. After this file has been started, the model in rviz should reflect the actual position of the robot, but no movement commands are send to the robot.
- * tracker_steer.launch: Loads the URDF model, starts the ROS drivers, the watchdog, and a ROS node to manipulate the values of the joint angles. *Caution:* The joint angles that are sent to the robot are set to the default value of '0' at start-up, so make sure the robot is in the initial pose before using this launch file, otherwise it will start moving!
+## Usage
 
-Without a running watchdog client, the ROS drivers only read from the control units in the robot, but do not send any commands. To enable sending of commands, the watchdog client has to be started:
-```
-rosrun taurob_watchdog_client taurob_watchdog_client 127.0.0.1
+Visualize the robot model (works today):
+
+```bash
+ros2 launch taurob_tracker_description visualize.launch.py
 ```
 
-**IMPORTANT:** Once the driver nodes are up and running, the battery’s supply voltage will be published on the topic /supply_voltage. You need to monitor that voltage during operation to prevent potential data loss and damage to the robot’s batteries!
-If the voltage drops below 22V, or remains below 23V for extended periods of time, please shut down everything, turn the robot off and let the battery charge. If you do not monitor the voltage, and it drops further down than that, components such as the WiFi AP or the on-board PC might simply power off, and the battery could be damaged (deep-discharge)! So to prevent loss of data or damage, make sure to always monitor the supply voltage.
+Full robot bringup (available once the `taurob_tracker_hardware` and `taurob_bringup` packages
+land, see the migration plan):
+
+```bash
+ros2 launch taurob_bringup tracker_bringup.launch.py
+```
+
+Driving the robot (with the watchdog client running on the control station):
+
+```bash
+ros2 topic pub /diff_drive_controller/cmd_vel_unstamped geometry_msgs/msg/Twist '{linear: {x: 0.3}, angular: {z: -0.1}}' -r 10
+```
+
+## Safety warnings
+
+*WARNING:* Using the watchdog as described above is *mandatory* for operating the robot with ROS.
+The watchdog client must run on the control station, not on the robot.
+
+*WARNING:* Do not run multiple instances of any driver or hardware interface! The resulting
+actions are unforeseeable. Do not use ROS and the taurob Commander software together.
+
+*WARNING:* Monitor the published supply voltage during operation. Stop using the robot if it drops
+below 23 V permanently; below 22 V shut everything down and charge the battery to avoid
+deep-discharge damage.
+
+*WARNING:* If your robot has an arm, it MUST be calibrated (per-joint offset YAML) before using it
+with ROS.
+
+## License
+
+Copyright (c) 2016-2025 taurob GmbH. BSD 3-clause; see [COPYING](COPYING).

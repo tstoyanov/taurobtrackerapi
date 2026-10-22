@@ -62,10 +62,10 @@ ROS 2 `ros2_control` implementation, but their code is also ROS 1 and requires f
 
 ### Phase 0 — Branch hygiene
 - [x] Create `jazzy` branch from `humble`.
-- [ ] Delete the unported ROS 1 node packages that are now deprecated
+- [x] Delete the unported ROS 1 node packages that are now deprecated
       (`taurob_base_node`, `taurob_arm_node`, `taurob_flipper_node`, `taurob_commander_switch`,
       `taurob_relay_dropper`, `taurob_teleop_twist_joy`).
-- [ ] Update top-level README: ROS 2 Jazzy-only, build with `colcon build`.
+- [x] Update top-level README: ROS 2 Jazzy-only, build with `colcon build`.
 
 ### Phase 1 — Foundation
 - [ ] Verify/patch `libtaurob` builds on Jazzy (rclcpp API drift from Humble; check deprecation

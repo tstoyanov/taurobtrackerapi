@@ -150,7 +150,11 @@ bool SocketUDPBinary::start_listen(void (*callback)(unsigned char* data, int len
 	if (bind_to_local_port != -1) {
 		bool bindSuccess = bind();
 		if (!bindSuccess) {
-			return false;
+			// The local port is already in use (e.g. by a simulated ECU on the
+			// same host). Continue with an ephemeral port: replies from the ECU
+			// are sent to our source address, so communication still works.
+			fprintf(stderr, "SocketUDPBinary: could not bind to local port %d, "
+				"continuing with an ephemeral port\n", bind_to_local_port);
 		}
 	}
 
@@ -177,7 +181,11 @@ bool SocketUDPBinary::start_listen(IUdpReceiverBinary* receiver_callback) {
 	if (bind_to_local_port != -1) {
 		bool bindSuccess = bind();
 		if (!bindSuccess) {
-			return false;
+			// The local port is already in use (e.g. by a simulated ECU on the
+			// same host). Continue with an ephemeral port: replies from the ECU
+			// are sent to our source address, so communication still works.
+			fprintf(stderr, "SocketUDPBinary: could not bind to local port %d, "
+				"continuing with an ephemeral port\n", bind_to_local_port);
 		}
 	}
 

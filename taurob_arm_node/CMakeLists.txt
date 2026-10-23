@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(taurob_arm_node)
 
+set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
+
 find_package(catkin REQUIRED COMPONENTS
   libtaurob
   message_generation

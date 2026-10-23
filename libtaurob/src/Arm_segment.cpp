@@ -35,6 +35,9 @@
 
 using namespace boost;
 
+//provide definition for c++-11 
+//const int Arm_segment::SENDING_THREAD_PERIOD_MS = 20;
+
 Arm_segment::Arm_segment(std::string segment_name,
 						 std::string host_ip, 
 						 int host_port, 

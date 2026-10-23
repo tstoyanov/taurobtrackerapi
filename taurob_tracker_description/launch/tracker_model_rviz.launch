@@ -8,12 +8,10 @@
   -->
   <param
     name="robot_description"
-    command="$(find xacro)/xacro.py $(find taurob_tracker_description)/urdf/tracker.urdf.xacro"/>
+    command="xacro $(find taurob_tracker_description)/urdf/tracker.urdf.xacro"/>
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
-  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
-    <param name="use_gui" value="true"/>
-  </node>
+  <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui"/>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find taurob_tracker_description)/launch/tracker_model_rviz.launch.rviz"/>
 </launch>
